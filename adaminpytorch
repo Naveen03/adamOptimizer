@@ -1,0 +1,44 @@
+class AdamOptimizer(nn.Module):
+    
+    def __init__(self, alpha=0.5, beta_1=0.9, beta_2=0.99, epsilon=1e-5):
+        super().__init__()
+        
+        self.alpha = alpha
+        self.beta_1 = beta_1
+        self.beta_2 = beta_2
+        self.epsilon = epsilon
+        
+        self.v_current = 0
+        self.s_current = 0
+        self.iter = 0
+        print('self.iter= ')
+        
+    def forward(self, x_current, grad):
+        #start = time.time()
+        
+        x_next = None
+        self.iter += 1 
+        
+        vt = torch.mul(self.v_current, self.beta_1) + torch.mul(grad, (1- self.beta_1))
+        st = torch.mul(self.s_current, self.beta_2) + torch.mul(math.pow(grad,2), (1- self.beta_2))
+        v_hat = torch.div(vt, (1- math.pow(self.beta_1, self.iter)))
+        s_hat = torch.div(st, (1- math.pow(self.beta_2, self.iter))) 
+        x_next = x_current - torch.mul (self.alpha, (torch.div(v_hat, (math.pow(s_hat, 0.5) + self.epsilon) ) ) )
+        self.v_current = vt
+        self.s_current = st
+        
+        """
+        vt = self.beta_1 * self.v_current + (1-self.beta_1) * grad
+        st = self.beta_2 * self.s_current + (1-self.beta_2) * math.pow(grad, 2)
+        v_hat = vt / (1- math.pow(self.beta_1, self.iter))
+        s_hat = st / (1- math.pow(self.beta_2, self.iter))
+        x_next = x_current - (self.alpha *(v_hat / (math.pow(s_hat, 0.5)) + self.epsilon ))
+        self.v_current = vt
+        self.s_current = st
+        """
+        
+        #duration = time.time()-start
+        #print('duration for one cycle=', duration)
+        print(self.iter, end = '  ')
+        
+        return x_next
